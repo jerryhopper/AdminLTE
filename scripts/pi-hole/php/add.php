@@ -7,7 +7,7 @@
 *  Please see LICENSE file for your rights under this license. */
 
 
-sw_blacklist();
+//sw_blacklist();
 
 require_once('auth.php');
 
@@ -26,7 +26,7 @@ if($type !== "regex") {
 }
 
 
-
+/*
 
 class CurlPost
 {
@@ -74,6 +74,8 @@ class CurlPost
         return $response;
     }
 }
+
+*/
 
 function sw_blacklist(){
 
