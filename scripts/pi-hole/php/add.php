@@ -96,10 +96,10 @@ function sw_blacklist(){
 
 switch($type) {
     case "white":
-        if (!isset($_POST["auditlog"]))
+        if (!isset($_POST["auditlog"])) {
             echo shell_exec("sudo pihole -w ${_POST['domain']}");
             sw_blacklist();
-        else {
+        } else {
             echo shell_exec("sudo pihole -w -n ${_POST['domain']}");
             echo shell_exec("sudo pihole -a audit ${_POST['domain']}");
             sw_blacklist();
