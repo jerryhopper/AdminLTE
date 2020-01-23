@@ -22,7 +22,7 @@
         }
     }
 ?>
-<h1>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</h1>
+<h1>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXyy</h1>
 <!-- Small boxes (Stat box) -->
 <div class="row">
     <div class="col-lg-3 col-sm-6">
@@ -78,7 +78,7 @@
     </div>
     <!-- ./col -->
 </div>
-<h1>XXXXXXXXXXXX------XXXXXXXXXXXXXXXX</h1>
+<h1>XXXXXXXXXXXX------XXXXXXXXXXXXXXXXyy</h1>
 <div class="row">
     <div class="col-md-12">
     <div class="box" id="queries-over-time">
