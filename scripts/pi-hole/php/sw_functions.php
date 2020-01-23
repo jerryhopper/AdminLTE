@@ -1,6 +1,33 @@
 <?php
 
+class SurfwijzerPiFunctions {
 
+    var $installationId;
+
+    var $oauthClientId       = "705dbbd8-0155-4e7e-9199-20b8e47388e5";
+    var $oauthAuthorizeUrl   = "https://idp.surfwijzer.nl/oauth2/authorize";
+
+    function __construct (){
+
+        if( !file_exists("/etc/pihole/surfwijzerVars.conf") ){
+            $this->installationId = "REINSTALLATION REQUIRED!";
+        }else{
+            $setupVars = parse_ini_file("/etc/pihole/surfwijzerVars.conf");
+            $this->installationId = $setupVars['installationId'];
+        }
+
+
+    }
+
+    function getInstallationId(){
+        return $this->installationId;
+    }
+
+    function oAuthloginUrl(){
+        return $this->oauthAuthorizeUrl."?response_type=code&scope=email+openid&client_id=".$this->oauthClientId."&state=&redirect_uri=http%3A%2F%2Fpi.hole%2Fadmin%2Findex.php";
+    }
+
+}
 
 
 
@@ -50,4 +77,6 @@ class CurlPost
         return $response;
     }
 }
+
+
 

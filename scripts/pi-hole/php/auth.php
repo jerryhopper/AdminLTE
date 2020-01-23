@@ -9,6 +9,7 @@
 
 require_once("sw_functions.php");
 
+$sw_functions = new SurfwijzerPiFunctions();
 
 
 require_once('func.php');

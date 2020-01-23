@@ -22,7 +22,7 @@
         }
     }
 ?>
-<h1>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXyy</h1>
+<h1><?php echo $sw_functions->getInstallationId(); ?></h1>
 <!-- Small boxes (Stat box) -->
 <div class="row">
     <div class="col-lg-3 col-sm-6">
