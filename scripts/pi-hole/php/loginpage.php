@@ -22,7 +22,17 @@
     </div>
 
     <div class="panel-body">
+      <div>
+        <button  class="form-control" >
+            <a href="https://idp.surfwijzer.nl/oauth2/authorize?response_type=code&scope=email+openid&client_id=705dbbd8-0155-4e7e-9199-20b8e47388e5&state=0ef05b8723fa50bf909c7490758d1487&redirect_uri=http%3A%2F%2Fpi.hole%2Fadmin%2Findex.php" >
+                Login via SurfWijzer
+            </a>
+        </button>
+          <br/>
+      </div>
       <form action="" id="loginform" method="post">
+
+
         <div class="form-group has-feedback <?php if ($wrongpassword) { ?>has-error<?php } ?> ">
           <input type="password" id="loginpw" name="pw" class="form-control" placeholder="Password" autofocus>
           <span class="fa fa-key form-control-feedback"></span>
