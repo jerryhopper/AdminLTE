@@ -9,8 +9,8 @@
 $api = true;
 header('Content-type: application/json');
 require("scripts/pi-hole/php/FTL.php");
-require("scripts/pi-hole/php/password.php");
 require("scripts/pi-hole/php/auth.php");
+require("scripts/pi-hole/php/password.php");
 check_cors();
 
 $FTL_IP = "127.0.0.1";
