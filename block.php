@@ -2,6 +2,8 @@
 header("Access-Control-Allow-Origin: *");
 #header("Content-Type: Application/Javascript");
 
+require_once ("vendor/autoload.php");
+require_once ("scripts/pi-hole/php/sw_functions.php");
 
 function parse_cookie($str) {
     $cookies = array();
@@ -17,10 +19,21 @@ function parse_cookie($str) {
 $cookie = parse_cookie($_SERVER['HTTP_COOKIE']);
 
 
+$sw= new SurfwijzerPiFunctions();
+
+try{
+    $sw->validate( $cookie['oauthlogin'][0] );
+}catch(\Exception $e){
+
+}
 
 
+$sw->getTokenExpiry();
+$sw->getTokenOwner();
 
 
+//echo ;
+#die();
 
 
 
@@ -35,7 +48,7 @@ $serverName = preg_replace('/^\[(.*)\]$/', '${1}', $serverName);
 if (!is_file("/etc/pihole/setupVars.conf"))
     die("[ERROR] File not found: <code>/etc/pihole/setupVars.conf</code>");
 
-if (is_file("/etc/pihole/SurfwijzerVars.conf"))
+if (is_file("/etc/pihole/surfwijzerVars.conf"))
     $surfwijzerVars = parse_ini_file("/etc/pihole/surfwijzerVars.conf");
 
 // Get values from setupVars.conf
@@ -213,8 +226,8 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
         <h1 id="bpTitle">
             <a class="title" href="/"><?php //Website Blocked ?></a>
         </h1>
-        <?php echo $surfwijzerVars['installationId']?>
-        <div class="spc"></div>
+
+        <div class="spc"><?php echo $surfwijzerVars['installationId']?></div>
 
         <input id="bpAboutToggle" type="checkbox"/>
         <div id="bpAbout">
