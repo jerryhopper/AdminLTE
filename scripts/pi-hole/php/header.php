@@ -10,61 +10,6 @@
     require "scripts/pi-hole/php/password.php";
 
 
-/*
-   oAuth login redirect occurred!
-*/
-if(!$auth && (!isset($indexpage) || isset($_GET['code'])))
-{
-    $scriptname = "login";
-
-    $_GET['userState'];
-    $_GET['code'];
-    $_GET['state'];
-
-        $curl = new CurlPost('https://705dbbd8-0155-4e7e-9199-20b8e47388e5:DOMJ0k7U5msfSTOVp6mOTkXzs41uYX5T_8nXxLIKUVw@idp.surfwijzer.nl/oauth2/token');
-        //var_dump($curl);
-        try {
-            // execute the request
-            $res = $curl([
-                'code' => $_GET['code'],
-                'grant_type' => 'authorization_code',
-                'redirect_uri'=>'http://pi.hole/admin/index.php',
-
-            ]);
-            //var_dump($res);
-        } catch (\RuntimeException $ex) {
-            // catch errors
-            die(sprintf('Http error %s with code %d', $ex->getMessage(), $ex->getCode()));
-        }
-
-    $res = json_decode($res);
-    $res = explode(".",$res->access_token);
-    //$res = '';
-    $res =  json_decode(base64_decode($res[1]) );
-
-    if(isset($setupVars['ADMIN_EMAIL']) ){
-        if($res->email==$setupVars['ADMIN_EMAIL']){
-            // is owner!
-            setcookie('persistentlogin', $setupVars['WEBPASSWORD'], time()+60*60*24*7);
-            $auth = true;
-        }
-
-    }
-    //print_r($res->email);
-
-
-
-    // curl -u TestClient:TestSecret https://api.mysite.com/token -d 'grant_type=authorization_code&code=xyz
-
-    // Refresh cookie with new expiry
-    #setcookie('persistentlogin', $pwhash, time()+60*60*24*7);
-    #$setupVars = parse_ini_file("/etc/pihole/setupVars.conf");
-    // Try to read password hash from setupVars.conf
-
-    #die();
-}
-
-
 
     check_cors();
 
@@ -244,6 +189,7 @@ if(!$auth && (!isset($indexpage) || isset($_GET['code'])))
     <!-- Usually browsers proactively perform domain name resolution on links that the user may choose to follow. We disable DNS prefetching here -->
     <meta http-equiv="x-dns-prefetch-control" content="off">
     <meta http-equiv="cache-control" content="max-age=60,private">
+
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon" />

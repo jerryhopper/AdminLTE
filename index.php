@@ -222,6 +222,7 @@ else
             </div>
         </div>
         <div class="overlay">
+        <div class="overlay">
           <i class="fa fa-sync fa-spin"></i>
         </div>
         <!-- /.box-body -->

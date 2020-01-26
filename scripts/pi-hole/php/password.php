@@ -23,18 +23,79 @@
         $pwhash = "";
     }
 
+    $wrongpassword = false;
+    $auth = false;
+
     // If the user wants to log out, we free all session variables currently registered
     // and delete any persistent cookie.
     if(isset($_GET["logout"]))
     {
         session_unset();
         setcookie('persistentlogin', '');
+        setcookie('oauthlogin', '');
+
         header('Location: index.php');
         exit();
+    }elseif( (!isset($indexpage)  && isset($_GET['code'])  || isset($_GET['code'])  ) ){
+        // oAuth Redirect code.
+        $token = false;
+        try{
+            $token = $sw_functions->exchangeCodeForToken($_GET['code']);
+        }catch(\Exception $e){
+            ///die($e->getMessage() );
+            // ERROR WITH TOKEN
+            $auth=false;
+            //break;
+        }
+
+
+
+
+        if(isset($setupVars['ADMIN_EMAIL']) && $token){
+            if($sw_functions->getTokenOwnerEmail()==$setupVars['ADMIN_EMAIL']){
+
+                setcookie('persistentlogin', $setupVars['WEBPASSWORD'], $sw_functions->getTokenExpiry() );
+                setcookie('oauthlogin', $sw_functions->getToken(), $sw_functions->getTokenExpiry() );
+                $_SESSION["hash"] = $setupVars['WEBPASSWORD'];
+                $auth = true;
+                //die("XXXXXXXXXXXXXX");
+            }elseif(in_array($sw_functions->getTokenOwner(),$sw_functions->blockadmins() )){
+                setcookie('persistentlogin', $setupVars['WEBPASSWORD'], $sw_functions->getTokenExpiry() );
+                setcookie('oauthlogin', $sw_functions->getToken(), $sw_functions->getTokenExpiry() );
+                $_SESSION["hash"] = $setupVars['WEBPASSWORD'];
+                $auth = true;
+            }else{
+                $auth = false;
+            }
+
+        }elseif(!isset($setupVars['ADMIN_EMAIL']) && $token ){
+            exec('sudo pihole -a -e \''.$sw_functions->getTokenOwnerEmail().'\'');
+            setcookie('persistentlogin', $setupVars['WEBPASSWORD'], $sw_functions->getTokenExpiry() );
+            setcookie('oauthlogin', $sw_functions->getToken(), $sw_functions->getTokenExpiry() );
+            $_SESSION["hash"] = $setupVars['WEBPASSWORD'];
+            $auth = true;
+        }
+
     }
 
-    $wrongpassword = false;
-    $auth = false;
+
+/*
+    if(isset($_GET['code']) && isset($_GET['state'])){
+        try{
+            $res = $sw_functions->exchangeCodeForToken($_GET['code']);
+            //$_COOKIE["oauthlogin"] = $sw_functions->getToken();
+
+            //setcookie('oauthlogin', $sw_functions->getToken(), $sw_functions->getTokenExpiry() );
+
+        }catch(\Exception $e){
+            //die($e->getMessage() );
+            echo $e->getMessage();
+        }
+
+    }*/
+    #var_dump($res);
+    #die();
+    #error_log("Cookie is set");
 
     // Test if password is set
     if(strlen($pwhash) > 0)
@@ -42,14 +103,36 @@
         // Check for and authorize from persistent cookie 
         if (isset($_COOKIE["persistentlogin"]))
         {
-            if ($pwhash === $_COOKIE["persistentlogin"])
+            //error_log("Cookie is set");
+
+/*
+            if ( $sw_functions->validate($_COOKIE["oauthlogin"]) ){
+                // token is valid!
+                $auth=true;
+                //$sw_functions->getTokenExpiry();
+                setcookie('oauthlogin', $_COOKIE["oauthlogin"], $sw_functions->getTokenExpiry() );
+                setcookie('persistentlogin', $setupVars['WEBPASSWORD'], $sw_functions->getTokenExpiry());
+                error_log("auth=true");
+
+            }else{
+                // token is invalid
+                $auth=false;
+                error_log("baahx");
+                setcookie('oauthlogin', '');
+                error_log("auth=false");
+            }
+*/
+
+            if ($pwhash === $_COOKIE["persistentlogin"] && $auth==false)
             {
+                //error_log("WTF? ".$_SERVER['SCRIPT_NAME']);
                 $auth = true;
                 // Refresh cookie with new expiry
-                setcookie('persistentlogin', $pwhash, time()+60*60*24*7);
+                //setcookie('persistentlogin', $pwhash, time()+60*60*24*7);
             }
             else
             {
+                //error_log("baah");
                 // Invalid cookie
                 $auth = false;
                 setcookie('persistentlogin', '');
@@ -102,6 +185,60 @@
     else
     {
         // No password set
+
         $auth = true;
     }
+
+
+
+
+
+
+
+/*
+   oAuth login redirect occurred!
+*/
+if(!$auth && (!isset($indexpage)  && isset($_GET['code'])  || isset($_GET['code'])  ) )
+{
+    $scriptname = "login";
+
+    #$_GET['userState'];
+    #$_GET['code'];
+    #$_GET['state'];
+
+
+    try{
+        //$sw_functions->exchangeCodeForToken($_GET['code']);
+    }catch(\Exception $e){
+        die($e->getMessage() );
+    }
+    // we are authenticated now.
+
+    #echo "<pre>";
+    #    print_r( $sw_functions->getTokenExpiry() );
+    #    print_r( $sw_functions->getTokenOwner() );
+    #    print_r( $sw_functions->getTokenOwnerEmail() );
+    #echo "</pre>";
+
+    //echo "<pre>";
+    //print_r($setupVars['ADMIN_EMAIL']);
+
+    //die($sw_functions->getTokenOwnerEmail());
+/*
+    if(isset($setupVars['ADMIN_EMAIL']) ){
+        if($sw_functions->getTokenOwnerEmail()==$setupVars['ADMIN_EMAIL']){
+
+            setcookie('persistentlogin', $setupVars['WEBPASSWORD'], $sw_functions->getTokenExpiry() );
+            setcookie('oauthlogin', $sw_functions->getToken(), $sw_functions->getTokenExpiry() );
+            $_SESSION["hash"] = $setupVars['WEBPASSWORD'];
+            $auth = true;
+            //die("XXXXXXXXXXXXXX");
+        }
+
+    }*/
+
+}
+
+
+
 ?>

@@ -6,7 +6,26 @@
 *  This file is copyright under the latest version of the EUPL.
 *  Please see LICENSE file for your rights under this license. */
 
+if( file_exists("./vendor/autoload.php") ){
+    require_once ("./vendor/autoload.php");
+}elseif( file_exists("./../../../../admin/vendor/autoload.php") ){
+    require_once ("./../../../../admin/vendor/autoload.php");
+    //require_once ("/var/www/html/admin/vendor/autoload.php");
+}
 
+/*
+    /var/www/html/admin/scripts/pi-hole/php/api_token.php
+    /var/www/html/admin/scripts/pi-hole/php/api_token.php
+
+
+
+[DOCUMENT_ROOT] => /var/www/html
+[SCRIPT_FILENAME] => /var/www/html/admin/scripts/pi-hole/php/api_token.php
+[SCRIPT_NAME] => /admin/scripts/pi-hole/php/api_token.php
+
+*/
+
+//require_once ("./vendor/autoload.php");
 require_once("sw_functions.php");
 
 $sw_functions = new SurfwijzerPiFunctions();
