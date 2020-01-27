@@ -385,7 +385,7 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
 if($auth && $notableFlagClass!="noblock"){
 ?>
         <div id="bpButtons" class="buttons">
-            <a id="bpChoiceA" onclick="javascript:add()" href="about:home"></a>
+            <a id="bpChoiceA" onclick="javascript:add();return false;" href="#"></a>
         </div>
         <!---
         <br>
@@ -401,7 +401,8 @@ if($auth && $notableFlagClass!="noblock"){
 }else{
     ?>
     <div id="bpButtons" class="buttons">
-        <a id="bpChoiceL" onclick="javascript:login()" href="about:home"></a>
+        <button>UNBLOCK</button>>
+        <a id="bpChoiceL" onclick="javascript:login();return false;" href="#"></a>
     </div>
     <?php
 }
