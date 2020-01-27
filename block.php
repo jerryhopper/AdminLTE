@@ -3,6 +3,11 @@ header("Access-Control-Allow-Origin: *");
 #header("Content-Type: Application/Javascript");
 
 require_once ("vendor/autoload.php");
+
+// Read setupVars.conf file
+$setupVars = parse_ini_file("/etc/pihole/setupVars.conf");
+
+//require "scripts/pi-hole/php/header.php";
 require_once ("scripts/pi-hole/php/sw_functions.php");
 
 function parse_cookie($str) {
@@ -19,30 +24,114 @@ function parse_cookie($str) {
 $cookie = parse_cookie($_SERVER['HTTP_COOKIE']);
 
 
-$sw= new SurfwijzerPiFunctions();
+$sw_functions= new SurfwijzerPiFunctions();
+$auth = false;
+if( isset($_GET['code'])   ) {
+    // oAuth Redirect code.
+    $token = false;
+    try {
+        $token = $sw_functions->exchangeCodeForToken($_GET['code']);
+    } catch (\Exception $e) {
+        die("XXXXXXXX".$e->getMessage() );
+        // ERROR WITH TOKEN
+        $auth = false;
+        //break;
+    }
+}elseif(isset($cookie['oauthlogin'])){
+    try{
+        $sw_functions->validate( $cookie['oauthlogin'][0] );
+        $auth=true;
+    }catch(\Exception $e){
+        $auth=false;
+        #die($e->getMessage());
+    }
+}
 
-try{
-    $sw->validate( $cookie['oauthlogin'][0] );
-}catch(\Exception $e){
+#var_dump($auth);
+#die();
+/*
+if(isset($setupVars['ADMIN_EMAIL']) && $token){
+    if($sw_functions->getTokenOwnerEmail()==$setupVars['ADMIN_EMAIL']){
+
+        setcookie('persistentlogin', $setupVars['WEBPASSWORD'], $sw_functions->getTokenExpiry() );
+        setcookie('oauthlogin', $sw_functions->getToken(), $sw_functions->getTokenExpiry() );
+        $_SESSION["hash"] = $setupVars['WEBPASSWORD'];
+        $auth = true;
+        //die("XXXXXXXXXXXXXX");
+    }elseif(in_array($sw_functions->getTokenOwner(),$sw_functions->blockadmins() )){
+        setcookie('persistentlogin', $setupVars['WEBPASSWORD'], $sw_functions->getTokenExpiry() );
+        setcookie('oauthlogin', $sw_functions->getToken(), $sw_functions->getTokenExpiry() );
+        $_SESSION["hash"] = $setupVars['WEBPASSWORD'];
+        $auth = true;
+    }else{
+        $auth = false;
+    }
+
+}*/
+
+//$auth = false;
+if( isset($cookie['oauthlogin']) ){
+
+
+
+
+}
+
+#print_r($cookie);
+
+
+
+
+/*
+if( $sw_functions->getTokenExpiry()-time()<10){
+
+};
+
+echo "<pre>";
+echo $sw_functions->getTokenExpiry()-time();
+//print_r($sw_functions);
+echo "</pre>";
+
+echo "<br>";
+echo time();
+echo "<br>";
+echo $sw_functions->getTokenExpiry();
+echo "<br>";
+echo $sw_functions->getTokenOwner();
+echo "<br>";
+echo $sw_functions->getTokenOwnerEmail();
+echo "<br>";
+//echo ;
+#die();
+
+*/
+//var_dump($auth);
+
+
+
+// Remove external ipv6 brackets if any
+
+
+if( isset($cookie['piblock']) && !isset($_GET['piblock'])){
+    // Sanitise HTTP_HOST output
+    $serverName = htmlspecialchars(base64_decode($cookie['piblock'][0]));
+    $serverName = preg_replace('/^\[(.*)\]$/', '${1}', $serverName);
+
+
+}else{
+    // Sanitise HTTP_HOST output
+    $serverName = htmlspecialchars(base64_decode($_GET['piblock']));
+    $serverName = preg_replace('/^\[(.*)\]$/', '${1}', $serverName);
+
+
+    if(!$auth){
+        //setcookie("piblock",$serverName,120);
+    }
 
 }
 
 
-$sw->getTokenExpiry();
-$sw->getTokenOwner();
 
-
-//echo ;
-#die();
-
-
-
-
-
-// Sanitise HTTP_HOST output
-$serverName = htmlspecialchars(base64_decode($_GET['piblock']));
-// Remove external ipv6 brackets if any
-$serverName = preg_replace('/^\[(.*)\]$/', '${1}', $serverName);
 
 
 if (!is_file("/etc/pihole/setupVars.conf"))
@@ -251,7 +340,7 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
 <main>
     <div id="bpOutput" class="<?=$wlOutputClass ?>"><?=$wlOutput ?></div>
     <div id="bpBlock">
-        <p class="blockMsg"><?=$serverName ?></p>
+        <p class="blockMsg"><a href="http://<?=$serverName ?>"><?=$serverName ?></a></p>
     </div>
 
     <?php if(isset($notableFlagClass)) { ?>
@@ -261,10 +350,63 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
     <?php } ?>
 
     <div id="bpHelpTxt"><?=$bpAskAdmin ?></div>
+    <!---
     <div id="bpButtons" class="buttons">
         <a id="bpBack" onclick="javascript:history.back()" href="about:home"></a>
         <?php if ($featuredTotal > 0) echo '<label id="bpInfo" for="bpMoreToggle"></label>'; ?>
+    </div>-->
+
+    <style>
+        #bpChoiceA:before { content: "Deblokkeer deze website"; }
+        #bpChoiceA {
+            background-color: #3c8dbc;
+
+        }
+
+        #bpChoiceB:before { content: "Breekt functionaliteit"; }
+        #bpChoiceB {
+            background-color: #a94442;
+
+        }
+
+        #bpChoiceC:before { content: "Foutief geblocked"; }
+        #bpChoiceC {
+            background-color: #00a65a;
+
+        }
+        #bpChoiceL:before { content: "Login"; }
+        #bpChoiceL {
+            background-color: #00a65a;
+
+        }
+    </style>
+    <div class="row">
+<?php
+if($auth && $notableFlagClass!="noblock"){
+?>
+        <div id="bpButtons" class="buttons">
+            <a id="bpChoiceA" onclick="javascript:add()" href="about:home"></a>
+        </div>
+        <!---
+        <br>
+        <div id="bpButtons" class="buttons">
+            <a id="bpChoiceB" onclick="javascript:history.back()" href="about:home"></a>
+        </div>
+        <br>
+        <div id="bpButtons" class="buttons">
+            <a id="bpChoiceC" onclick="javascript:history.back()" href="about:home"></a>
+        </div> --->
     </div>
+<?php
+}else{
+    ?>
+    <div id="bpButtons" class="buttons">
+        <a id="bpChoiceL" onclick="javascript:login()" href="about:home"></a>
+    </div>
+    <?php
+}
+    ?>
+
     <input id="bpMoreToggle" type="checkbox">
     <div>
         <pre></pre>
@@ -279,27 +421,26 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
                     }
                 }
             }
-            echo "<h1>Categorie: ".$blockListCategorie."</h1>";
+            //echo "<h1>Categorie: ".$blockListCategorie."</h1>";
 
             ?>
-        <form>
-
+<!---
             <div class="form-group">
                 <label for="exampleFormControlSelect1">Reden voor unblock? </label>
-                <select class="form-control" id="exampleFormControlSelect1">
+                <select id="swunblockreason" class="form-control" id="exampleFormControlSelect1">
                     <option>Persoonlijke whitelist</option>
                     <option>Breekt functionaliteit</option>
                     <option>Falsly Blocked</option>
                     <option>4</option>
                     <option>5</option>
                 </select>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
+                <button type="submit" class="btn btn-primary" id="swunblock">Submit</button>
+            </div>-->
             <div class="form-group">
 
 
             </div>
-        </form>
+
         <hr>
     </div>
     <div id="bpMoreInfoc">
@@ -340,7 +481,8 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
             cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
             credentials: 'same-origin', // include, *same-origin, omit
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Bearer: '+ window.getCookie("oauthlogin"),
             },
             redirect: 'follow', // manual, *follow, error
             referrerPolicy: 'no-referrer', // no-referrer, *client
@@ -350,20 +492,74 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
         return await response.json(); // parses JSON response into native JavaScript objects
     }
 
+    function login(){
+        var domain = "<?=$serverName ?>";
+        setCookie("piblock",domain,0.002);
+        var redir = "https://idp.surfwijzer.nl/oauth2/authorize?response_type=code&scope=email&client_id=705dbbd8-0155-4e7e-9199-20b8e47388e5&state=&redirect_uri=http%3A%2F%2Fpi.hole%2Fadmin%2Findex.php"
+        window.location = redir;
+    }
+    function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+        var expires = "expires="+ d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
     function add() {
         $("#bpOutput").removeClass("hidden error exception");
         $("#bpOutput").addClass("add");
+
+        var reason = $("#swunblockreason option:selected" ).text();
         var domain = "<?=$serverName ?>";
         var pw = $("#bpWLPassword");
         if(domain.length === 0) {
             return;
         }
-        postData('https://blocklists.surfwijzer.nl/whitelist', { domain: domain }).then((data) => {
+        console.log(reason);
+        console.log(domain);
+        console.log(pw);
+        console.log(window.getCookie("oauthlogin"));
 
-            console.log(data); // JSON data parsed by `response.json()` call
-            originaladd();
+        $.ajax({
+            url: "/admin/scripts/pi-hole/php/add.php",
+            method: "post",
+            data: {
+                "domain":domain,
+                "list":"white",
+                "pw":pw.val()+"x",
+                "reason": $("#swunblockreason option:selected" ).text()
+            },
+            success: function(response) {
+                if(response.indexOf("Pi-hole blocking") !== -1) {
+                    setTimeout(function(){window.location.reload(1);}, 10000);
+                    $("#bpOutput").removeClass("add");
+                    $("#bpOutput").addClass("success");
+                    $("#bpOutput").html("");
+                } else {
+                    $("#bpOutput").removeClass("add");
+                    $("#bpOutput").addClass("error");
+                    $("#bpOutput").html(""+response+"");
+                }
+            },
+            error: function(jqXHR, exception) {
+                $("#bpOutput").removeClass("add");
+                $("#bpOutput").addClass("exception");
+                $("#bpOutput").html("");
+            }
         });
+        //originaladd();
+        //postData('https://blocklists.surfwijzer.nl/whitelist', { domain: domain }).then((data) => {
 
+            //console.log(data); // JSON data parsed by `response.json()` call
+            //originaladd();
+        //});
+
+    }
+
+    window.getCookie = function(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (match) return match[2];
+        return "anon";
     }
 
     function originaladd() {
@@ -377,7 +573,12 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
         $.ajax({
             url: "/admin/scripts/pi-hole/php/add.php",
             method: "post",
-            data: {"domain":domain, "list":"white", "pw":pw.val()},
+            data: {
+                "domain":domain,
+                "list":"white",
+                "pw":pw.val(),
+                "reason": $("#swunblockreason option:selected" ).text()
+            },
             success: function(response) {
                 if(response.indexOf("Pi-hole blocking") !== -1) {
                     setTimeout(function(){window.location.reload(1);}, 10000);
@@ -403,6 +604,10 @@ $r = array( "persistentlogin"=>$cookie['persistentlogin'][0], "oauthlogin"=>$coo
 
             add();
         }
+    });
+
+    $("#swunblock").on("click", function() {
+        add();
     });
     $("#bpWhitelist").on("click", function() {
         add();

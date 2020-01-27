@@ -78,7 +78,10 @@
 
     }
 
-
+    if($auth && isset($_COOKIE['piblock'])){
+        header("Location: http://pi.hole/admin/block.php?piblock=".base64_encode($_COOKIE['piblock']));
+        //die($_COOKIE['piblock']);
+    }
 /*
     if(isset($_GET['code']) && isset($_GET['state'])){
         try{
