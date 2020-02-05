@@ -78,7 +78,7 @@
     </div>
     <!-- ./col -->
 </div>
-<h1>XXXXXXXXXXXX------XXXXXXXXXXXXXXXXyy</h1>
+<h1>XXXXXXXxXXXXX------XXXXXXXXXXXXXXXXyy</h1>
 <div class="row">
     <div class="col-md-12">
     <div class="box" id="queries-over-time">
