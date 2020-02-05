@@ -22,19 +22,27 @@ class SurfwijzerPiFunctions {
     private $token          = "";
 
     function __construct (){
+        //var/www/
+        /*
+         surfwijzerVars.conf
+         installationId=df1787c3-a88a-42c9-b204-34c20edb7b41
+
+        */
+
         if( !file_exists("/etc/pihole/surfwijzerVars.conf") ){
             $this->installationId = "REINSTALLATION REQUIRED!";
         }else{
             $setupVars = parse_ini_file("/etc/pihole/surfwijzerVars.conf");
             $this->installationId = $setupVars['installationId'];
+            $this->installationDate = $setupVars['installationDate'];
+
             #$this->oauthIssuer = $setupVars['oauthIssuer'];
             #$this->oauthClientId = $setupVars['oauthClientId'];
             #$this->oauthAuthorizeUrl = $setupVars['oauthAuthorizeUrl'];
             #$this->oauthTokenUrl = $setupVars['oauthTokenUrl'];
-
-
-
         }
+
+
     }
 
     public function getInstallationId(){
